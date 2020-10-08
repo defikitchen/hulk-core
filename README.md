@@ -1,4 +1,7 @@
-Hulk.Finance token, its value and potential
+Hulk.Finance token, its value and potential.
+
+We will run a presale of HULK tokens in a few days. 
+As we wrote before, we plan to sell 10,000 HULKs at a presale price of 0.1 ETH (or 1 ETH=10 HULKs)
 
 ## Install Creationix-NVM. GOOGLE IT AND DO IT!
 
@@ -16,13 +19,13 @@ Hulk.Finance token, its value and potential
 
 ## Deployed Contracts / Hash
 
-- LunchToken - https://etherscan.io/token/0xdeadbeef
-- LunchLady - https://etherscan.io/address/0xdeadbeef
-- (Uni|Lunch)swapV2Factory - https://etherscan.io/address/0xdeadbeef
-- (Uni|Lunch)swapV2Router02 - https://etherscan.io/address/0xdeadbeef
-- (Uni|Lunch)swapV2Pair init code hash - `deadbeef`
-- LunchBar - https://etherscan.io/address/0xdeadbeef
-- LunchMaker - https://etherscan.io/address/0xdeadbeef
+- HulkToken - https://etherscan.io/token/0xdeadbeef
+- MrsHulk - https://etherscan.io/address/0xdeadbeef
+- (Uni|Hulk)swapV2Factory - https://etherscan.io/address/0xdeadbeef
+- (Uni|Hulk)swapV2Router02 - https://etherscan.io/address/0xdeadbeef
+- (Uni|Hulk)swapV2Pair init code hash - `deadbeef`
+- HulkBeef - https://etherscan.io/address/0xdeadbeef
+- BeefKitchen - https://etherscan.io/address/0xdeadbeef
 
 ## License
 
