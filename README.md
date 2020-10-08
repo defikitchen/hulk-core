@@ -108,28 +108,10 @@ the following:
 slither .
 ```
 
-## Mythril-Classic
+## Medium Page
 
-If you do not have a Mac, [please see the wiki for ubuntu or docker setup instructions](https://github.com/ConsenSys/mythril-classic/wiki/Installation-and-Setup)
-Prerequisites: for the following instructions to work, you must have:
-- python3
-- homebrew
-- virtualenv        (installed in section above)
-
-From within the root of the directory, run the following commands:
-
-```bash
-~ brew update
-~ brew upgrade
-~ brew tap ethereum/ethereum
-~ brew install leveldb
-~ brew install solidity                     // now you have all the necessary dependencies from brew
-
-~ virtualenv venv-mythril                   // to setup a virtual environment in folder ./venv-mythril
-~ source venv-mythril/bin/activate          // to activate your virtual environment
-~ pip3 install -r mythril-requirements.txt  // to install the necessary requirements for mythril
-```
+For extensive documentation, please visit: https://medium.com/@hulkfinance
 
 ### Discord Channel
 
-Join now! discord.gg/qyfg6za
+Join the conversation: discord.gg/qyfg6za
