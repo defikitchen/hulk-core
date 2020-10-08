@@ -1,6 +1,4 @@
-# LunchSwap 🥪
-
-https://lunch.finance  Feel free to read the code. More details coming soon.
+Hulk.Finance token, its value and potential
 
 ## Install Creationix-NVM. GOOGLE IT AND DO IT!
 
@@ -129,21 +127,6 @@ From within the root of the directory, run the following commands:
 ~ pip3 install -r mythril-requirements.txt  // to install the necessary requirements for mythril
 ```
 
-### Now to actually run mythril...
+### Discord Channel
 
-'Mythril-Classic' depends on importing all of the relevant contract imports before analysing the code. Allowing
-these files to be imported actually has to be enabled,and gets more complex when allowing imports from
-node-modules (e.g. Open Zeppelin). For this reason it's easier to run mythril on a truffle build folder,
-which does all the imports for you.
-To set this up we therefore run:
-
-```bash
-~ rm -r build             // To remove the existing build (in case theres any old files no longer used in there)
-~ yarn truffle compile    // To generate a fresh build with the latest versions
-```
-
-Now all `myth` commands just need to be appended with `--truffle` to ensure they use the build folder.
-e.g. the following command will run mythril on all contracts using the build folder:
-```bash
-~ myth -x --truffle
-```
+Join now! discord.gg/qyfg6za
