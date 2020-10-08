@@ -2,7 +2,7 @@
 
 Hunk.Finance is a community-governed Decentralized Autonomous Organization with four stages plan that will be implemented within 30 days from project launch. We want to make DAO that will benefit from combination of Decentralized Finance (DeFi) and High Frequency Trading (HFT).
 
-Hunk.Finance project is planned to becreated on ERC20 network — the leading Blockchain platform. At this stage Hunk.Finance is an experimental beta phase and HunkFinance is based on ERC20 token HUNK.
+We will run a presale of HULK tokens in a few days. As we wrote before, we plan to sell 10,000 HULKs at a presale price of 0.1 ETH (or 1 ETH=10 HULKs)
 
 ## Install Creationix-NVM. GOOGLE IT AND DO IT!
 
