@@ -1,0 +1,44 @@
+{
+  "name": "hulk",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "test": "yarn cover && truffle test --stacktrace-extra",
+    "cover": "yarn lint && truffle run coverage",
+    "lint": "prettier --write './test/*.js' && prettier --write **/*.sol && solium -d contracts/ --fix"
+  },
+  "devDependencies": {
+    "@openzeppelin/cli": "^2.8.2",
+    "@openzeppelin/contracts": "^3.2.0",
+    "@openzeppelin/test-helpers": "^0.5.6",
+    "eth-gas-reporter": "^0.2.1",
+    "ganache-cli": "6.4.4",
+    "ganache-time-traveler": "^1.0.15",
+    "mocha": "^6.0.2",
+    "prettier": "^2.1.2",
+    "prettier-plugin-solidity": "^1.0.0-alpha.58",
+    "solidity-coverage": "git://github.com/leapdao/solidity-coverage#master",
+    "solidity-docgen": "^0.2.0-alpha.0",
+    "truffle-flattener": "^1.4.4",
+    "truffle-hdwallet-provider": "^1.0.17",
+    "typechain": "^0.3.17",
+    "web3": "^1.3.0"
+  },
+  "engines": {
+    "node": "10.x"
+  },
+  "dependencies": {},
+  "resolutions": {
+    "*/**/js-yaml": "3.14.0"
+  },
+  "standard": {
+    "env": [
+      "mocha"
+    ],
+    "ignore": [
+      "test/util.js",
+      "test/constants.js"
+    ]
+  }
+}

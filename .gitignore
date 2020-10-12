@@ -1,0 +1,17 @@
+/node_modules/
+/build/
+
+.openzeppelin/.session
+
+.DS_Store
+.openzeppelin/
+**/.DS_Store
+
+secrets.json
+
+/.idea/
+*.iml
+
+coverage/
+coverage.json
+allFiredEvents
