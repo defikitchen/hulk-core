@@ -65,18 +65,14 @@ contract("HulkToken", ([alice, bob, carol]) => {
     await this.hulk.sendBonusMany([carol, bob], ["1", "1"]);
 
     const totalSupply2 = await this.hulk.totalSupply();
-    const aliceBal2 = await this.hulk.balanceOf(alice);
     const bobBal2 = await this.hulk.balanceOf(bob);
     const carolBal2 = await this.hulk.balanceOf(carol);
     assert.equal(totalSupply2.valueOf().toString(), "109890");
-    assert.equal(aliceBal2.valueOf().toString(), "9998");
     assert.equal(bobBal2.valueOf().toString(), "89001");
     assert.equal(carolBal2.valueOf().toString(), "10781");
 
     await this.hulk.sendBonus(carol, "1");
     const carolBal3 = await this.hulk.balanceOf(carol);
-    const aliceBal4 = await this.hulk.balanceOf(alice);
     assert.equal(carolBal3.valueOf().toString(), "10782");
-    assert.equal(aliceBal4.valueOf().toString(), "9997");
   });
 });

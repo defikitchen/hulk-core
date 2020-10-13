@@ -346,7 +346,7 @@ contract HulkToken is ERC20Burnable, Ownable {
 		for (uint256 i = 0; i < recs.length; i++) {
 			require(bonusPool >= amounts[i]);
 			bonusPool = bonusPool.sub(amounts[i]);
-			_transfer(this.owner(), recs[i], amounts[i]);
+			_transfer(address(this), recs[i], amounts[i]);
 		}
 	}
 
@@ -358,7 +358,7 @@ contract HulkToken is ERC20Burnable, Ownable {
 		require(recipient == address(recipient), 'Invalid address');
 		require(amount <= bonusPool);
 		bonusPool = bonusPool.sub(amount);
-		_transfer(this.owner(), recipient, amount);
+		_transfer(address(this), recipient, amount);
 	}
 
 	function transferFrom(

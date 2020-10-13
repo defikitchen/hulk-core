@@ -64,7 +64,7 @@ module.exports = {
       skipDryRun: false,
       network_id: 1,
       gas: 210000,
-      gasPrice: 90000000000
+      gasPrice: 80000000000
     },
     goerli: {
       provider: () => new HDWalletProvider(
