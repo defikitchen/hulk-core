@@ -10,7 +10,7 @@ module.exports = function (deployer, network, accounts) {
       // DEPLOY MULTISIG WALLET - Hulk & MOCK TOKENS
       await deployer.deploy(HulkToken, {
         from: DEV,
-        gas: 4000000
+        gas: 3250000
       })
 
       console.log(`Successfully deployed hulk token ${network}. `)

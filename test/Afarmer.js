@@ -2,43 +2,39 @@ const {
   expectRevert,
   time
 } = require("@openzeppelin/test-helpers");
-const HulkToken = artifacts.require("HulkToken");
-const Hulkfarmer = artifacts.require("Hulkfarmer");
+const Token = artifacts.require("HulkToken");
+const Farmer = artifacts.require("Hulkfarmer");
 const MockERC20 = artifacts.require("MockERC20");
 
-contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
+contract("Farmer", ([alice, bob, carol, dev, minter]) => {
   beforeEach(async () => {
-    this.hulk = await HulkToken.new({
+    this.token = await Token.new({
       from: alice,
     });
   });
 
   it("should set correct state variables", async () => {
-    this.farmer = await Hulkfarmer.new(
-      this.hulk.address,
-      dev,
-      "1000",
-      [1, 2, 4, 8, 16], {
+    this.farmer = await Farmer.new(
+      this.token.address,
+      dev, {
         from: alice,
       }
     );
-    await this.hulk.transferOwnership(this.farmer.address, {
+    await this.token.transferOwnership(this.farmer.address, {
       from: alice,
     });
-    const hulk = await this.farmer.hulk();
+    const token = await this.farmer.token();
     const devaddr = await this.farmer.devaddr();
-    const owner = await this.hulk.owner();
-    assert.equal(hulk.valueOf(), this.hulk.address);
+    const owner = await this.token.owner();
+    assert.equal(token.valueOf(), this.token.address);
     assert.equal(devaddr.valueOf(), dev);
     assert.equal(owner.valueOf(), this.farmer.address);
   });
 
   it("should allow dev and only dev to update dev", async () => {
-    this.farmer = await Hulkfarmer.new(
-      this.hulk.address,
-      dev,
-      "1000",
-      [1, 2, 4, 8, 16], {
+    this.farmer = await Farmer.new(
+      this.token.address,
+      dev, {
         from: alice,
       }
     );
@@ -89,11 +85,9 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
 
     it("should allow emergency withdraw", async () => {
       // 100 per block farming rate starting at block 100 with bonus until block 1000
-      this.farmer = await Hulkfarmer.new(
-        this.hulk.address,
-        dev,
-        "100",
-        [1, 2, 4, 8, 16], {
+      this.farmer = await Farmer.new(
+        this.token.address,
+        dev, {
           from: alice,
         }
       );
@@ -111,20 +105,19 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
       assert.equal((await this.lp.balanceOf(bob)).valueOf().toString(), "1000");
     });
 
-    it("should give out Hulks only after farming time", async () => {
+    it("should mint only after farming time", async () => {
       // 100 per block farming rate starting at block 100 with bonus until block 1000
-      this.farmer = await Hulkfarmer.new(
-        this.hulk.address,
-        dev,
-        "100",
-        [1, 2, 4, 8, 16], {
+      this.farmer = await Farmer.new(
+        this.token.address,
+        dev, {
           from: alice,
         }
       );
-      await this.hulk.transferOwnership(this.farmer.address, {
+      await this.token.transferOwnership(this.farmer.address, {
         from: alice,
       });
       await this.farmer.add("100", this.lp.address, true);
+      assert((await this.farmer.poolLength()).valueOf().toString(), '1');
       await this.lp.approve(this.farmer.address, "1000", {
         from: bob,
       });
@@ -135,105 +128,126 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
       await this.farmer.deposit(0, "0", {
         from: bob,
       }); // block 90
-      assert.equal((await this.hulk.balanceOf(bob)).valueOf().toString(), "0");
+      assert.equal((await this.token.balanceOf(bob)).valueOf().toString(), "0");
       await time.advanceBlockTo("94");
       await this.farmer.deposit(0, "0", {
         from: bob,
       }); // block 95
-      assert.equal((await this.hulk.balanceOf(bob)).valueOf().toString(), "0");
-      await time.advanceBlockTo("99");
+      assert.equal((await this.token.balanceOf(bob)).valueOf().toString(), "0");
+      await time.advanceBlockTo("98");
       await this.farmer.deposit(0, "0", {
         from: bob,
       }); // block 100
-      assert.equal((await this.hulk.balanceOf(bob)).valueOf().toString(), "0");
-      await time.advanceBlockTo("100");
+      assert.equal((await this.token.balanceOf(bob)).valueOf().toString(), "0");
+      await this.farmer.startFarming(1000, 1000, "1000", "100", [1, 2, 4, 8, 16], 10);
+      assert.equal((await time.latestBlock()).valueOf().toString(), "100");
+      assert.equal((await this.farmer.getFarmingStartBlock()).valueOf().toString(), "100");
       await this.farmer.deposit(0, "0", {
         from: bob,
-      }); // block 101
+      });
+      assert.equal((await time.latestBlock()).valueOf().toString(), "101");
+      // block 101
       assert.equal(
-        (await this.hulk.balanceOf(bob)).valueOf().toString(),
+        (await this.farmer.pendingReward(0, bob)).valueOf().toString(),
+        "0"
+      );
+      assert.equal(
+        (await this.token.balanceOf(dev)).valueOf().toString(),
+        "0"
+      );
+      await this.farmer.massUpdatePools();
+      await time.advanceBlockTo("102");
+      assert.equal(
+        (await this.farmer.pendingReward(0, bob)).valueOf().toString(),
         "1000"
       );
-      await time.advanceBlockTo("104");
+      assert.equal(
+        (await this.token.balanceOf(dev)).valueOf().toString(),
+        "50"
+      );
+      assert.equal(
+        (await this.token.totalSupply()).valueOf().toString(),
+        "1050"
+      );
+      await time.advanceBlockTo("103");
       await this.farmer.deposit(0, "0", {
         from: bob,
-      }); // block 105
+      }); // block 104
       assert.equal(
-        (await this.hulk.balanceOf(bob)).valueOf().toString(),
-        "5000"
+        (await this.token.balanceOf(bob)).valueOf().toString(),
+        "3000"
       );
       assert.equal(
-        (await this.hulk.balanceOf(dev)).valueOf().toString(),
-        "500"
+        (await this.token.balanceOf(dev)).valueOf().toString(),
+        "150"
       );
       assert.equal(
-        (await this.hulk.totalSupply()).valueOf().toString(),
-        "5500"
+        (await this.token.totalSupply()).valueOf().toString(),
+        "3150"
       );
     });
 
-    it("should not distribute Hulks if no one deposit", async () => {
+    it("should not distribute if no one deposit", async () => {
       // 100 per block farming rate starting at block 200 with bonus until block 1000
-      this.farmer = await Hulkfarmer.new(
-        this.hulk.address,
-        dev,
-        "100",
-        [1, 2, 4, 8, 16], {
+      this.farmer = await Farmer.new(
+        this.token.address,
+        dev, {
           from: alice,
         }
       );
-      await this.hulk.transferOwnership(this.farmer.address, {
+      await this.token.transferOwnership(this.farmer.address, {
         from: alice,
       });
+
       await this.farmer.add("100", this.lp.address, true);
+      await this.farmer.startFarming(1000, 1000, "1000", "100", [1, 2, 4, 8, 16], 10);
       await this.lp.approve(this.farmer.address, "1000", {
         from: bob,
       });
       await time.advanceBlockTo("199");
-      assert.equal((await this.hulk.totalSupply()).valueOf().toString(), "0");
+      assert.equal((await this.token.totalSupply()).valueOf().toString(), "0");
       await time.advanceBlockTo("204");
-      assert.equal((await this.hulk.totalSupply()).valueOf().toString(), "0");
+      assert.equal((await this.token.totalSupply()).valueOf().toString(), "0");
       await time.advanceBlockTo("209");
       await this.farmer.deposit(0, "10", {
         from: bob,
       }); // block 210
-      assert.equal((await this.hulk.totalSupply()).valueOf().toString(), "0");
-      assert.equal((await this.hulk.balanceOf(bob)).valueOf().toString(), "0");
-      assert.equal((await this.hulk.balanceOf(dev)).valueOf().toString(), "0");
+      assert.equal((await this.token.totalSupply()).valueOf().toString(), "0");
+      assert.equal((await this.token.balanceOf(bob)).valueOf().toString(), "0");
+      assert.equal((await this.token.balanceOf(dev)).valueOf().toString(), "0");
       assert.equal((await this.lp.balanceOf(bob)).valueOf().toString(), "990");
       await time.advanceBlockTo("219");
       await this.farmer.withdraw(0, "10", {
         from: bob,
       }); // block 220
       assert.equal(
-        (await this.hulk.totalSupply()).valueOf().toString(),
-        "11000"
+        (await this.token.totalSupply()).valueOf().toString(),
+        "10500"
       );
       assert.equal(
-        (await this.hulk.balanceOf(bob)).valueOf().toString(),
+        (await this.token.balanceOf(bob)).valueOf().toString(),
         "10000"
       );
       assert.equal(
-        (await this.hulk.balanceOf(dev)).valueOf().toString(),
-        "1000"
+        (await this.token.balanceOf(dev)).valueOf().toString(),
+        "500"
       );
       assert.equal((await this.lp.balanceOf(bob)).valueOf().toString(), "1000");
     });
 
-    it("should distribute Hulks properly for each staker", async () => {
+    it("should distribute properly for each staker", async () => {
       // 100 per block farming rate starting at block 300 with bonus until block 1000
-      this.farmer = await Hulkfarmer.new(
-        this.hulk.address,
-        dev,
-        "100",
-        [1, 2, 4, 8, 16], {
+      this.farmer = await Farmer.new(
+        this.token.address,
+        dev, {
           from: alice,
         }
       );
-      await this.hulk.transferOwnership(this.farmer.address, {
+      await this.token.transferOwnership(this.farmer.address, {
         from: alice,
       });
       await this.farmer.add("100", this.lp.address, true);
+      await this.farmer.startFarming(1000, 1000, "1000", "100", [1, 2, 4, 8, 16], 10);
       await this.lp.approve(this.farmer.address, "1000", {
         from: alice,
       });
@@ -260,31 +274,31 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
       });
       // Alice deposits 10 more LPs at block 320. At this point:
       //   Alice should have: 4*1000 + 4*1/3*1000 + 2*1/6*1000 = 5666
-      //   Hulkfarmer should have the remaining: 10000 - 5666 = 4334
+      //   Farmer should have the remaining: 10000 - 5666 = 4334
       await time.advanceBlockTo("319");
       await this.farmer.deposit(0, "10", {
         from: alice,
       });
       assert.equal(
-        (await this.hulk.totalSupply()).valueOf().toString(),
-        "11000"
+        (await this.token.totalSupply()).valueOf().toString(),
+        "10500"
       );
       assert.equal(
-        (await this.hulk.balanceOf(alice)).valueOf().toString(),
+        (await this.token.balanceOf(alice)).valueOf().toString(),
         "5666"
       );
-      assert.equal((await this.hulk.balanceOf(bob)).valueOf().toString(), "0");
+      assert.equal((await this.token.balanceOf(bob)).valueOf().toString(), "0");
       assert.equal(
-        (await this.hulk.balanceOf(carol)).valueOf().toString(),
+        (await this.token.balanceOf(carol)).valueOf().toString(),
         "0"
       );
       assert.equal(
-        (await this.hulk.balanceOf(this.farmer.address)).valueOf().toString(),
+        (await this.token.balanceOf(this.farmer.address)).valueOf().toString(),
         "4334"
       );
       assert.equal(
-        (await this.hulk.balanceOf(dev)).valueOf().toString(),
-        "1000"
+        (await this.token.balanceOf(dev)).valueOf().toString(),
+        "500"
       );
       // Bob withdraws 5 LPs at block 330. At this point:
       //   Bob should have: 4*2/3*1000 + 2*2/6*1000 + 10*2/7*1000 = 6190
@@ -293,28 +307,28 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
         from: bob,
       });
       assert.equal(
-        (await this.hulk.totalSupply()).valueOf().toString(),
-        "22000"
+        (await this.token.totalSupply()).valueOf().toString(),
+        "21000"
       );
       assert.equal(
-        (await this.hulk.balanceOf(alice)).valueOf().toString(),
+        (await this.token.balanceOf(alice)).valueOf().toString(),
         "5666"
       );
       assert.equal(
-        (await this.hulk.balanceOf(bob)).valueOf().toString(),
+        (await this.token.balanceOf(bob)).valueOf().toString(),
         "6190"
       );
       assert.equal(
-        (await this.hulk.balanceOf(carol)).valueOf().toString(),
+        (await this.token.balanceOf(carol)).valueOf().toString(),
         "0"
       );
       assert.equal(
-        (await this.hulk.balanceOf(this.farmer.address)).valueOf().toString(),
+        (await this.token.balanceOf(this.farmer.address)).valueOf().toString(),
         "8144"
       );
       assert.equal(
-        (await this.hulk.balanceOf(dev)).valueOf().toString(),
-        "2000"
+        (await this.token.balanceOf(dev)).valueOf().toString(),
+        "1000"
       );
       // Alice withdraws 20 LPs at block 340.
       // Bob withdraws 15 LPs at block 350.
@@ -332,26 +346,26 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
         from: carol,
       });
       assert.equal(
-        (await this.hulk.totalSupply()).valueOf().toString(),
-        "55000"
+        (await this.token.totalSupply()).valueOf().toString(),
+        "52500"
       );
       assert.equal(
-        (await this.hulk.balanceOf(dev)).valueOf().toString(),
-        "5000"
+        (await this.token.balanceOf(dev)).valueOf().toString(),
+        "2500"
       );
       // Alice should have: 5666 + 10*2/7*1000 + 10*2/6.5*1000 = 11600
       assert.equal(
-        (await this.hulk.balanceOf(alice)).valueOf().toString(),
+        (await this.token.balanceOf(alice)).valueOf().toString(),
         "11600"
       );
       // Bob should have: 6190 + 10*1.5/6.5 * 1000 + 10*1.5/4.5*1000 = 11831
       assert.equal(
-        (await this.hulk.balanceOf(bob)).valueOf().toString(),
+        (await this.token.balanceOf(bob)).valueOf().toString(),
         "11831"
       );
       // Carol should have: 2*3/6*1000 + 10*3/7*1000 + 10*3/6.5*1000 + 10*3/4.5*1000 + 10*1000 = 26568
       assert.equal(
-        (await this.hulk.balanceOf(carol)).valueOf().toString(),
+        (await this.token.balanceOf(carol)).valueOf().toString(),
         "26568"
       );
       // All of them should have 1000 LPs back.
@@ -365,18 +379,15 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
         "1000"
       );
     });
-
-    it("should give proper Hulks allocation to each pool", async () => {
+    it("should give proper allocation to each pool", async () => {
       // 100 per block farming rate starting at block 400 with bonus until block 1000
-      this.farmer = await Hulkfarmer.new(
-        this.hulk.address,
-        dev,
-        "100",
-        [1, 2, 4, 8, 16], {
+      this.farmer = await Farmer.new(
+        this.token.address,
+        dev, {
           from: alice,
         }
       );
-      await this.hulk.transferOwnership(this.farmer.address, {
+      await this.token.transferOwnership(this.farmer.address, {
         from: alice,
       });
       await this.lp.approve(this.farmer.address, "1000", {
@@ -387,6 +398,7 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
       });
       // Add first LP to the pool with allocation 1
       await this.farmer.add("10", this.lp.address, true);
+      await this.farmer.startFarming(1000, 1000, "1000", "100", [1, 2, 4, 8, 16], 10);
       // Alice deposits 10 LPs at block 410
       await time.advanceBlockTo("409");
       await this.farmer.deposit(0, "10", {
@@ -396,10 +408,12 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
       await time.advanceBlockTo("419");
       await this.farmer.add("20", this.lp2.address, true);
       // Alice should have 10*1000 pending reward
+      assert.equal((await time.latestBlock()).valueOf().toString(), "420");
       assert.equal(
-        (await this.farmer.pendingHulk(0, alice)).valueOf().toString(),
+        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
         "10000"
       );
+
       // Bob deposits 10 LP2s at block 425
       await time.advanceBlockTo("424");
       await this.farmer.deposit(1, "5", {
@@ -407,60 +421,18 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
       });
       // Alice should have 10000 + 5*1/3*1000 = 11666 pending reward
       assert.equal(
-        (await this.farmer.pendingHulk(0, alice)).valueOf().toString(),
+        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
         "11666"
       );
       await time.advanceBlockTo("430");
       // At block 430. Bob should get 5*2/3*1000 = 3333. Alice should get ~1666 more.
       assert.equal(
-        (await this.farmer.pendingHulk(0, alice)).valueOf().toString(),
+        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
         "13333"
       );
       assert.equal(
-        (await this.farmer.pendingHulk(1, bob)).valueOf().toString(),
+        (await this.farmer.pendingReward(1, bob)).valueOf().toString(),
         "3333"
-      );
-    });
-
-    it("should stop giving bonus Hulks after the bonus period ends", async () => {
-      // 100 per block farming rate starting at block 500 with bonus until block 600
-      this.farmer = await Hulkfarmer.new(
-        this.hulk.address,
-        dev,
-        "100",
-        [1, 2, 4, 8, 16], {
-          from: alice,
-        }
-      );
-      await this.hulk.transferOwnership(this.farmer.address, {
-        from: alice,
-      });
-      await this.lp.approve(this.farmer.address, "1000", {
-        from: alice,
-      });
-      await this.farmer.add("1", this.lp.address, true);
-      // Alice deposits 10 LPs at block 590
-      await time.advanceBlockTo("589");
-      await this.farmer.deposit(0, "10", {
-        from: alice,
-      });
-      // At block 605, she should have 1000*10 + 100*5 = 10500 pending.
-      await time.advanceBlockTo("605");
-      assert.equal(
-        (await this.farmer.pendingHulk(0, alice)).valueOf().toString(),
-        "10500"
-      );
-      // At block 606, Alice withdraws all pending rewards and should get 10600.
-      await this.farmer.deposit(0, "0", {
-        from: alice,
-      });
-      assert.equal(
-        (await this.farmer.pendingHulk(0, alice)).valueOf().toString(),
-        "0"
-      );
-      assert.equal(
-        (await this.hulk.balanceOf(alice)).valueOf().toString(),
-        "10600"
       );
     });
   });

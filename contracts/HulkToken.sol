@@ -18,7 +18,7 @@ contract HulkToken is ERC20Burnable, Ownable {
 	uint256 public burnPool = 0 ether;
 	uint256 public minSupply = 0 ether;
 	// maximum supply to be minted by farming contract
-	uint256 public constant maxSupply = 100000 ether;
+	uint256 public constant maxSupply = 100 ether;
 	uint256 public burnRate = 0;
 	uint256 public bonusRate = 0;
 	uint256 public bigBurnRate = 0;

@@ -102,9 +102,7 @@ contract("Timelock", ([alice, bob, carol, dev, minter]) => {
     });
     this.farmer = await Hulkfarmer.new(
       this.hulk.address,
-      dev,
-      "1000",
-      [1, 2, 4, 8, 16], {
+      dev, {
         from: alice
       }
     );

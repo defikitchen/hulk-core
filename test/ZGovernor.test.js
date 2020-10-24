@@ -22,12 +22,14 @@ contract("Governor", ([alice, minter, dev]) => {
     await this.hulk.delegate(dev, {
       from: dev,
     });
-    this.farmer = await Hulkfarmer.new(this.hulk.address, dev, "100", [1, 2, 4, 8, 16], {
+    this.farmer = await Hulkfarmer.new(this.hulk.address, dev, {
       from: alice,
     });
     await this.hulk.transferOwnership(this.farmer.address, {
       from: alice,
     });
+    await this.father.startFarming(100, 100, "100", "100", [1, 2, 4, 8, 16], 1);
+
     this.lp = await MockERC20.new("LPToken", "LP", "10000000000", {
       from: minter,
     });
