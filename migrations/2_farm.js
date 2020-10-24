@@ -12,7 +12,7 @@ module.exports = async function (deployer, network, accounts) {
                 TokenInstance.address,
                 DEV, {
                     from: DEV,
-                    gas: 3120000
+                    gas: 3620000
                 });
         } catch (e) {
             console.log(e);

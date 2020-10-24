@@ -50,6 +50,8 @@ contract Hulkfarmer is Ownable {
 	address public devaddr;
 	// Block number when bonus HULK period ends.
 	uint256 public bonusEndBlock;
+	// How many coins to burn when unstaking
+	uint256 public unstakeBurnRate = 0;
 	// HULK tokens created per block.
 	uint256 public tokenPerBlock;
 	// farming on/off switch
@@ -366,14 +368,17 @@ contract Hulkfarmer is Ownable {
 		PoolInfo storage pool = poolInfo[_pid];
 		UserInfo storage user = userInfo[_pid][msg.sender];
 		updatePool(_pid);
-		if (user.amount > 0) {
-			uint256 pending = user.amount.mul(pool.accPerShare).div(1e12).sub(
-				user.rewardDebt
-			);
-			if (pending > 0) {
-				safeTokenTransfer(msg.sender, pending);
-			}
-		}
+		// if user has any LP tokens staked, we would send the reward here
+		// but NOT ANYMORE
+		//
+		// if (user.amount > 0) {
+		// 	uint256 pending = user.amount.mul(pool.accPerShare).div(1e12).sub(
+		// 		user.rewardDebt
+		// 	);
+		// 	if (pending > 0) {
+		// 		safeTokenTransfer(msg.sender, pending);
+		// 	}
+		// }
 		if (_amount > 0) {
 			pool.lpToken.safeTransferFrom(
 				address(msg.sender),
@@ -386,6 +391,11 @@ contract Hulkfarmer is Ownable {
 		emit Deposit(msg.sender, _pid, _amount);
 	}
 
+	function setUnstakeBurnRate(uint256 newRate) public onlyOwner returns (bool) {
+		unstakeBurnRate = newRate;
+		return true;
+	}
+
 	// Withdraw LP tokens from Hulkfarmer.
 	function withdraw(uint256 _pid, uint256 _amount) public {
 		PoolInfo storage pool = poolInfo[_pid];
@@ -395,12 +405,22 @@ contract Hulkfarmer is Ownable {
 		uint256 pending = user.amount.mul(pool.accPerShare).div(1e12).sub(
 			user.rewardDebt
 		);
+		uint256 burnPending = 0;
 		if (pending > 0) {
-			safeTokenTransfer(msg.sender, pending);
+			burnPending = pending.mul(unstakeBurnRate).div(10000);
+			uint256 sendPending = pending.sub(burnPending);
+			if (token.totalSupply().sub(burnPending) < token.minSupply()) {
+				burnPending = 0;
+			}
+
+			safeTokenTransfer(msg.sender, sendPending);
 		}
 		if (_amount > 0) {
 			user.amount = user.amount.sub(_amount);
 			pool.lpToken.safeTransfer(address(msg.sender), _amount);
+		}
+		if (burnPending > 0) {
+			token.burnFrom(_msgSender(), burnPending);
 		}
 		user.rewardDebt = user.amount.mul(pool.accPerShare).div(1e12);
 		emit Withdraw(msg.sender, _pid, _amount);

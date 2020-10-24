@@ -8,7 +8,7 @@ module.exports = async function (deployer, network, accounts) {
     try {
       const HulkfarmerInstance = await Hulkfarmer.deployed();
 
-      await HulkfarmerInstance.startFarming(36000, 14400, "7200", "69000000000000000", [1, 2, 4, 8, 16], 10, {
+      await HulkfarmerInstance.startFarming(108000, 0, "21600", "1911589472200000000", [1, 2, 4, 8, 16], 1, {
         from: DEV,
         gas: 240000
       });
