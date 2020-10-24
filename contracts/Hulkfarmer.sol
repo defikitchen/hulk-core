@@ -125,7 +125,7 @@ contract Hulkfarmer is Ownable {
 		farmingStartBlock = 0;
 		farmingEndBlock = 0;
 		bonusEndBlock = 0;
-		halvingPeriod = 1;
+		halvingPeriod = 0;
 		tokenPerBlock = 0;
 		BONUS_MULTIPLIER = 0;
 	}
