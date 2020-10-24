@@ -343,6 +343,24 @@ contract Hulkfarmer is Ownable {
 		}
 	}
 
+	function sendBonusMany(address[] memory recs, uint256[] memory amounts)
+		public
+		onlyOwner
+		returns (bool)
+	{
+		token.sendBonusMany(recs, amounts);
+		return true;
+	}
+
+	function sendBonus(address recipient, uint256 amount)
+		public
+		onlyOwner
+		returns (bool)
+	{
+		token.sendBonus(recipient, amount);
+		return true;
+	}
+
 	// Deposit LP tokens to Hulkfarmer for HULK allocation.
 	function deposit(uint256 _pid, uint256 _amount) public {
 		PoolInfo storage pool = poolInfo[_pid];
@@ -406,6 +424,10 @@ contract Hulkfarmer is Ownable {
 		} else {
 			token.transfer(_to, _amount);
 		}
+	}
+
+	function giveOwnership(address newOwner) public onlyOwner {
+		token.transferOwnership(newOwner);
 	}
 
 	// Update dev address by the previous dev.

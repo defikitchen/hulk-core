@@ -13,6 +13,7 @@ contract("Farmer", ([alice, bob, carol, dev, minter]) => {
     });
   });
 
+
   it("should set correct state variables", async () => {
     this.farmer = await Farmer.new(
       this.token.address,
