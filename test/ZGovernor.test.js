@@ -28,7 +28,7 @@ contract("Governor", ([alice, minter, dev]) => {
     await this.hulk.transferOwnership(this.farmer.address, {
       from: alice,
     });
-    await this.father.startFarming(100, 100, "100", "100", [1, 2, 4, 8, 16], 1);
+    await this.farmer.startFarming(100, 100, "100", "100", [1, 2, 4, 8, 16], 1);
 
     this.lp = await MockERC20.new("LPToken", "LP", "10000000000", {
       from: minter,
@@ -49,12 +49,12 @@ contract("Governor", ([alice, minter, dev]) => {
     await this.farmer.deposit(0, "100", {
       from: minter,
     });
-    assert.equal((await this.hulk.totalSupply()).valueOf().toString(), "110");
+    assert.equal((await this.hulk.totalSupply()).valueOf().toString(), "105");
     assert.equal(
       (await this.hulk.balanceOf(minter)).valueOf().toString(),
       "100"
     );
-    assert.equal((await this.hulk.balanceOf(dev)).valueOf().toString(), "10");
+    assert.equal((await this.hulk.balanceOf(dev)).valueOf().toString(), "5");
     // Transfer ownership to timelock contract
     this.timelock = await Timelock.new(alice, time.duration.days(2), {
       from: alice,
