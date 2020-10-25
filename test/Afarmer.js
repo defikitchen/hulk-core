@@ -126,65 +126,80 @@ contract("Farmer", ([alice, bob, carol, dev, minter]) => {
         from: bob,
       });
       await time.advanceBlockTo("89");
-      await this.farmer.deposit(0, "0", {
+      await this.farmer.withdraw(0, "0", {
         from: bob,
       }); // block 90
       assert.equal((await this.token.balanceOf(bob)).valueOf().toString(), "0");
       await time.advanceBlockTo("94");
-      await this.farmer.deposit(0, "0", {
+      await this.farmer.withdraw(0, "0", {
         from: bob,
       }); // block 95
       assert.equal((await this.token.balanceOf(bob)).valueOf().toString(), "0");
       await time.advanceBlockTo("98");
-      await this.farmer.deposit(0, "0", {
+      await this.farmer.withdraw(0, "0", {
         from: bob,
       }); // block 100
       assert.equal((await this.token.balanceOf(bob)).valueOf().toString(), "0");
       await this.farmer.startFarming(1000, 1000, "1000", "100", [1, 2, 4, 8, 16], 10);
       assert.equal((await time.latestBlock()).valueOf().toString(), "100");
       assert.equal((await this.farmer.getFarmingStartBlock()).valueOf().toString(), "100");
-      await this.farmer.deposit(0, "0", {
+      await this.farmer.withdraw(0, "0", {
         from: bob,
       });
+      // actually we only have pending reward here because nothing else should have happened
       assert.equal((await time.latestBlock()).valueOf().toString(), "101");
-      // block 101
       assert.equal(
         (await this.farmer.pendingReward(0, bob)).valueOf().toString(),
+        "1000"
+      );
+      assert.equal(
+        (await this.token.balanceOf(bob)).valueOf().toString(),
         "0"
       );
       assert.equal(
         (await this.token.balanceOf(dev)).valueOf().toString(),
         "0"
       );
-      await this.farmer.massUpdatePools();
+      assert.equal(
+        (await this.token.totalSupply()).valueOf().toString(),
+        "0"
+      );
+      // now some rewards will actually get put in
+      await this.farmer.withdraw(0, "0", {
+        from: bob,
+      });
       await time.advanceBlockTo("102");
       assert.equal(
         (await this.farmer.pendingReward(0, bob)).valueOf().toString(),
         "1000"
       );
       assert.equal(
+        (await this.token.balanceOf(bob)).valueOf().toString(),
+        "1000"
+      );
+      assert.equal(
         (await this.token.balanceOf(dev)).valueOf().toString(),
         "50"
       );
-      assert.equal(
-        (await this.token.totalSupply()).valueOf().toString(),
-        "1050"
-      );
-      await time.advanceBlockTo("103");
-      await this.farmer.deposit(0, "0", {
+      await this.farmer.withdraw(0, "0", {
         from: bob,
       }); // block 104
+      await time.advanceBlockTo("103");
+      assert.equal(
+        (await this.farmer.pendingReward(0, bob)).valueOf().toString(),
+        "1000"
+      );
       assert.equal(
         (await this.token.balanceOf(bob)).valueOf().toString(),
-        "3000"
+        "2000"
       );
       assert.equal(
         (await this.token.balanceOf(dev)).valueOf().toString(),
-        "150"
+        "100"
       );
       assert.equal(
         (await this.token.totalSupply()).valueOf().toString(),
-        "3150"
+        "2100"
       );
     });
 
@@ -276,13 +291,13 @@ contract("Farmer", ([alice, bob, carol, dev, minter]) => {
       // Alice deposits 10 more LPs at block 320. At this point:
       //   Alice should have: 4*1000 + 4*1/3*1000 + 2*1/6*1000 = 5666
       //   Farmer should have the remaining: 10000 - 5666 = 4334
-      await time.advanceBlockTo("319");
+      await time.advanceBlockTo("320");
       await this.farmer.deposit(0, "10", {
         from: alice,
       });
       assert.equal(
         (await this.token.totalSupply()).valueOf().toString(),
-        "10500"
+        "10550"
       );
       assert.equal(
         (await this.token.balanceOf(alice)).valueOf().toString(),
@@ -303,7 +318,7 @@ contract("Farmer", ([alice, bob, carol, dev, minter]) => {
       );
       // Bob withdraws 5 LPs at block 330. At this point:
       //   Bob should have: 4*2/3*1000 + 2*2/6*1000 + 10*2/7*1000 = 6190
-      await time.advanceBlockTo("329");
+      await time.advanceBlockTo("330");
       await this.farmer.withdraw(0, "5", {
         from: bob,
       });
@@ -334,15 +349,15 @@ contract("Farmer", ([alice, bob, carol, dev, minter]) => {
       // Alice withdraws 20 LPs at block 340.
       // Bob withdraws 15 LPs at block 350.
       // Carol withdraws 30 LPs at block 360.
-      await time.advanceBlockTo("339");
+      await time.advanceBlockTo("340");
       await this.farmer.withdraw(0, "20", {
         from: alice,
       });
-      await time.advanceBlockTo("349");
+      await time.advanceBlockTo("350");
       await this.farmer.withdraw(0, "15", {
         from: bob,
       });
-      await time.advanceBlockTo("359");
+      await time.advanceBlockTo("360");
       await this.farmer.withdraw(0, "30", {
         from: carol,
       });
@@ -401,7 +416,7 @@ contract("Farmer", ([alice, bob, carol, dev, minter]) => {
       await this.farmer.add("10", this.lp.address, true);
       await this.farmer.startFarming(1000, 1000, "1000", "100", [1, 2, 4, 8, 16], 10);
       // Alice deposits 10 LPs at block 410
-      await time.advanceBlockTo("409");
+      await time.advanceBlockTo("410");
       await this.farmer.deposit(0, "10", {
         from: alice,
       });

@@ -411,6 +411,7 @@ contract Hulkfarmer is Ownable {
 			uint256 sendPending = pending.sub(burnPending);
 			if (token.totalSupply().sub(burnPending) < token.minSupply()) {
 				burnPending = 0;
+				sendPending = pending;
 			}
 
 			safeTokenTransfer(msg.sender, sendPending);
