@@ -59,7 +59,8 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
         from: alice,
       });
       await this.farmer.add("1", this.lp.address, true);
-      await time.advanceBlockTo(99);
+      await time.advanceBlockTo(98);
+      await this.farmer.setUnstakeBurnRate(500);
       await this.farmer.startFarming(105, 100, "1000", "100", [1, 2, 4, 8, 16], 10);
       assert.equal((await time.latestBlock()).valueOf().toString(), "100");
       assert.equal((await this.farmer.getFarmingStartBlock()).valueOf().toString(), "100");
@@ -99,9 +100,10 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
         "100"
       );
+      // should have burned 520
       assert.equal(
         (await this.token.balanceOf(alice)).valueOf().toString(),
-        "10400"
+        "9880"
       );
       /// withdraw exactly on the last block
       await this.farmer.withdraw(0, "0", {
@@ -112,9 +114,10 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
         "0"
       );
+      // should have burned another 5
       assert.equal(
         (await this.token.balanceOf(alice)).valueOf().toString(),
-        "10500"
+        "9975"
       );
 
       // last farming block has been reached
@@ -125,7 +128,7 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
       );
       assert.equal(
         (await this.token.balanceOf(alice)).valueOf().toString(),
-        "10500"
+        "9975"
       );
       await time.advanceBlockTo("207");
       assert.equal(
@@ -142,7 +145,7 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
       );
       assert.equal(
         (await this.token.balanceOf(alice)).valueOf().toString(),
-        "10500"
+        "9975"
       );
       await time.advanceBlockTo("300");
       assert.equal(
@@ -155,101 +158,9 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
 
       assert.equal(
         (await this.token.balanceOf(alice)).valueOf().toString(),
-        "10500"
+        "9975"
       );
 
-      await time.advanceBlockTo("999");
-      await this.farmer.startFarming(105, 100, "1000", "100", [1, 2, 4, 8, 16], 10);
-      assert.equal((await time.latestBlock()).valueOf().toString(), "1000");
-      assert.equal((await this.farmer.getFarmingStartBlock()).valueOf().toString(), "1000");
-      assert.equal((await this.farmer.getFarmingEndBlock()).valueOf().toString(), "1105");
-      assert.equal((await this.farmer.getBonusEndBlock()).valueOf().toString(), "1100");
-      // Alice deposits 10 LPs at block 590
-      await time.advanceBlockTo("1089");
-      await this.farmer.deposit(0, "10", {
-        from: alice,
-      });
-      await time.advanceBlockTo("1100");
-      assert.equal(
-        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "10100"
-      );
-      await time.advanceBlockTo("1101");
-      assert.equal(
-        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "10200"
-      );
-      await time.advanceBlockTo("1102");
-      assert.equal(
-        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "10300"
-      );
-      await time.advanceBlockTo("1103");
-      assert.equal(
-        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "10400"
-      );
-      await time.advanceBlockTo("1104");
-      assert.equal(
-        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "10500"
-      );
-      await time.advanceBlockTo("1105");
-      assert.equal(
-        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "0"
-      );
-      assert.equal(
-        (await this.token.balanceOf(alice)).valueOf().toString(),
-        "10500"
-      );
-      await time.advanceBlockTo("1106");
-      assert.equal(
-        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "0"
-      );
-      assert.equal(
-        (await this.token.balanceOf(alice)).valueOf().toString(),
-        "10500"
-      );
-      await time.advanceBlockTo("1107");
-      assert.equal(
-        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "0"
-      );
-      assert.equal(
-        (await this.token.balanceOf(alice)).valueOf().toString(),
-        "10500"
-      );
-      // try to withdraw AFTER farming ends
-      await this.farmer.withdraw(0, "0", {
-        from: alice,
-      });
-      await time.advanceBlockTo("1108");
-      assert.equal(
-        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "0"
-      );
-      assert.equal(
-        (await this.token.balanceOf(alice)).valueOf().toString(),
-        "21000"
-      );
-      await this.farmer.withdraw(0, "0", {
-        from: alice,
-      }); //127
-      assert.equal(
-        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "0"
-      );
-      await time.advanceBlockTo("1120");
-      assert.equal(
-        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "0"
-      );
-      assert.equal(
-        (await this.token.balanceOf(alice)).valueOf().toString(),
-        "21000"
-      );
     });
   });
 });

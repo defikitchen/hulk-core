@@ -50,6 +50,8 @@ contract Hulkfarmer is Ownable {
 	address public devaddr;
 	// Block number when bonus HULK period ends.
 	uint256 public bonusEndBlock;
+	// total burned on unstake
+	uint256 public totalUnstakeBurn = 0;
 	// How many coins to burn when unstaking
 	uint256 public unstakeBurnRate = 0;
 	// HULK tokens created per block.
@@ -242,7 +244,7 @@ contract Hulkfarmer is Ownable {
 		view
 		returns (uint256)
 	{
-		uint256 tokenReward;
+		uint256 tokenReward = 0;
 		if (_from < farmingStartBlock || _to > farmingEndBlock) {
 			tokenReward = 0;
 		} else if (_to <= bonusEndBlock) {
@@ -414,13 +416,14 @@ contract Hulkfarmer is Ownable {
 				sendPending = pending;
 			}
 			safeTokenTransfer(msg.sender, sendPending);
+			if (burnPending > 0) {
+				totalUnstakeBurn = totalUnstakeBurn.add(burnPending);
+				token.burn(burnPending);
+			}
 		}
 		if (_amount > 0) {
 			user.amount = user.amount.sub(_amount);
 			pool.lpToken.safeTransfer(address(msg.sender), _amount);
-		}
-		if (burnPending > 0) {
-			token.burnFrom(_msgSender(), burnPending);
 		}
 		user.rewardDebt = user.amount.mul(pool.accPerShare).div(1e12);
 		emit Withdraw(msg.sender, _pid, _amount);
