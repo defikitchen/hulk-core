@@ -61,7 +61,7 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
       await this.farmer.add("1", this.lp.address, true);
       await time.advanceBlockTo(98);
       await this.farmer.setUnstakeBurnRate(500);
-      await this.farmer.startFarming(105, 100, "1000", "100", [1, 2, 4, 8, 16], 10);
+      await this.farmer.startFarming(105, 100, "1000", "100", [1, 2, 4, 8, 16], 1);
       assert.equal((await time.latestBlock()).valueOf().toString(), "100");
       assert.equal((await this.farmer.getFarmingStartBlock()).valueOf().toString(), "100");
       assert.equal((await this.farmer.getFarmingEndBlock()).valueOf().toString(), "205");
@@ -74,22 +74,22 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
       await time.advanceBlockTo("200");
       assert.equal(
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "10100"
+        "1100"
       );
       await time.advanceBlockTo("201");
       assert.equal(
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "10200"
+        "1200"
       );
       await time.advanceBlockTo("202");
       assert.equal(
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "10300"
+        "1300"
       );
       await time.advanceBlockTo("203");
       assert.equal(
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "10400"
+        "1400"
       );
       await this.farmer.withdraw(0, "0", {
         from: alice,
@@ -103,7 +103,7 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
       // should have burned 520
       assert.equal(
         (await this.token.balanceOf(alice)).valueOf().toString(),
-        "9880"
+        "1330"
       );
       /// withdraw exactly on the last block
       await this.farmer.withdraw(0, "0", {
@@ -117,7 +117,7 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
       // should have burned another 5
       assert.equal(
         (await this.token.balanceOf(alice)).valueOf().toString(),
-        "9975"
+        "1425"
       );
 
       // last farming block has been reached
@@ -128,7 +128,7 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
       );
       assert.equal(
         (await this.token.balanceOf(alice)).valueOf().toString(),
-        "9975"
+        "1425"
       );
       await time.advanceBlockTo("207");
       assert.equal(
@@ -145,7 +145,7 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
       );
       assert.equal(
         (await this.token.balanceOf(alice)).valueOf().toString(),
-        "9975"
+        "1425"
       );
       await time.advanceBlockTo("300");
       assert.equal(
@@ -158,7 +158,7 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
 
       assert.equal(
         (await this.token.balanceOf(alice)).valueOf().toString(),
-        "9975"
+        "1425"
       );
 
     });
