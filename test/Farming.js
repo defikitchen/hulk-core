@@ -194,6 +194,8 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
         "10500"
       );
       await time.advanceBlockTo("1105");
+      let mult = await this.farmer.getMultiplier(1104, 1105);
+      console.log(mult.valueOf().toString());
       assert.equal(
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
         "10500"

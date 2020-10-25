@@ -242,9 +242,10 @@ contract Hulkfarmer is Ownable {
 		view
 		returns (uint256)
 	{
-		uint256 tokenReward = 0;
-
-		if (_to <= bonusEndBlock) {
+		uint256 tokenReward;
+		if (_from < farmingStartBlock || _to > farmingEndBlock) {
+			tokenReward = 0;
+		} else if (_to <= bonusEndBlock) {
 			tokenReward = _to.sub(_from).mul(BONUS_MULTIPLIER);
 		} else if (_from >= bonusEndBlock) {
 			tokenReward = _to.sub(_from);
@@ -253,9 +254,7 @@ contract Hulkfarmer is Ownable {
 				_to.sub(bonusEndBlock)
 			);
 		}
-		if (_from < farmingStartBlock || _to > farmingEndBlock) {
-			tokenReward = 0;
-		}
+
 		// console.log(_from, _to, bonusEndBlock);
 		require(tokenReward >= 0, 'reward < 0');
 		uint256 diff = (block.number).sub(farmingStartBlock);
