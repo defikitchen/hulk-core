@@ -311,7 +311,7 @@ contract Hulkfarmer is Ownable {
 	// Update reward variables of the given pool to be up-to-date.
 	function updatePool(uint256 _pid) public {
 		PoolInfo storage pool = poolInfo[_pid];
-		if (block.number < pool.lastRewardBlock) {
+		if (block.number <= pool.lastRewardBlock) {
 			return;
 		}
 		uint256 lpSupply = pool.lpToken.balanceOf(address(this));

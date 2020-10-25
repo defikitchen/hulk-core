@@ -263,7 +263,12 @@ contract("Farmer", ([alice, bob, carol, dev, minter]) => {
         from: alice,
       });
       await this.farmer.add("100", this.lp.address, true);
-      await this.farmer.startFarming(1000, 1000, "1000", "100", [1, 2, 4, 8, 16], 10);
+      await time.advanceBlockTo("99");
+      await this.farmer.startFarming(100, 100, "100", "100", [1, 2, 4, 8, 16], 10);
+      assert.equal((await time.latestBlock()).valueOf().toString(), "100");
+      assert.equal((await this.farmer.getFarmingStartBlock()).valueOf().toString(), "100");
+      assert.equal((await this.farmer.getFarmingEndBlock()).valueOf().toString(), "200");
+      assert.equal((await this.farmer.getBonusEndBlock()).valueOf().toString(), "200");
       await this.lp.approve(this.farmer.address, "1000", {
         from: alice,
       });
@@ -273,25 +278,25 @@ contract("Farmer", ([alice, bob, carol, dev, minter]) => {
       await this.lp.approve(this.farmer.address, "1000", {
         from: carol,
       });
-      // Alice deposits 10 LPs at block 310
-      await time.advanceBlockTo("309");
+      // Alice deposits 10 LPs at block 110
+      await time.advanceBlockTo("110");
       await this.farmer.deposit(0, "10", {
         from: alice,
       });
-      // Bob deposits 20 LPs at block 314
-      await time.advanceBlockTo("313");
+      // Bob deposits 20 LPs at block 114
+      await time.advanceBlockTo("114");
       await this.farmer.deposit(0, "20", {
         from: bob,
       });
-      // Carol deposits 30 LPs at block 318
-      await time.advanceBlockTo("317");
+      // Carol deposits 30 LPs at block 117
+      await time.advanceBlockTo("117");
       await this.farmer.deposit(0, "30", {
         from: carol,
       });
-      // Alice deposits 10 more LPs at block 320. At this point:
+      // Alice deposits 10 more LPs at block 120. At this point:
       //   Alice should have: 4*1000 + 4*1/3*1000 + 2*1/6*1000 = 5666
       //   Farmer should have the remaining: 10000 - 5666 = 4334
-      await time.advanceBlockTo("319");
+      await time.advanceBlockTo("119");
       // to block 320
       await this.farmer.deposit(0, "10", {
         from: alice,
@@ -423,7 +428,7 @@ contract("Farmer", ([alice, bob, carol, dev, minter]) => {
       await this.farmer.add("10", this.lp.address, true);
       await this.farmer.startFarming(1000, 1000, "1000", "100", [1, 2, 4, 8, 16], 10);
       // Alice deposits 10 LPs at block 410
-      await time.advanceBlockTo("410");
+      await time.advanceBlockTo("409");
       await this.farmer.deposit(0, "10", {
         from: alice,
       });
