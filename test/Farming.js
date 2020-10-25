@@ -73,36 +73,28 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
       await time.advanceBlockTo("200");
       assert.equal(
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "10000"
+        "10100"
       );
       await time.advanceBlockTo("201");
       assert.equal(
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "10100"
+        "10200"
       );
       await time.advanceBlockTo("202");
       assert.equal(
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "10200"
+        "10300"
       );
       await time.advanceBlockTo("203");
       assert.equal(
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "10300"
+        "10400"
       );
       await this.farmer.withdraw(0, "0", {
         from: alice,
       });
+      // last farming block, and they withdraw. weird attack
       await time.advanceBlockTo("204");
-      assert.equal(
-        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "0"
-      );
-      assert.equal(
-        (await this.token.balanceOf(alice)).valueOf().toString(),
-        "10400"
-      );
-      await time.advanceBlockTo("205");
       assert.equal(
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
         "100"
@@ -114,22 +106,42 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
       await this.farmer.withdraw(0, "0", {
         from: alice,
       });
+      await time.advanceBlockTo("205");
+      assert.equal(
+        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
+        "0"
+      );
+      assert.equal(
+        (await this.token.balanceOf(alice)).valueOf().toString(),
+        "10500"
+      );
+
       // last farming block has been reached
       await time.advanceBlockTo("206");
       assert.equal(
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
         "0"
       );
+      assert.equal(
+        (await this.token.balanceOf(alice)).valueOf().toString(),
+        "10500"
+      );
       await time.advanceBlockTo("207");
       assert.equal(
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
         "0"
       );
-
+      await this.farmer.withdraw(0, "0", {
+        from: alice,
+      });
       await time.advanceBlockTo("208");
       assert.equal(
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
         "0"
+      );
+      assert.equal(
+        (await this.token.balanceOf(alice)).valueOf().toString(),
+        "10500"
       );
       await time.advanceBlockTo("300");
       assert.equal(
@@ -142,7 +154,7 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
 
       assert.equal(
         (await this.token.balanceOf(alice)).valueOf().toString(),
-        "10400"
+        "10500"
       );
 
       await time.advanceBlockTo("999");
@@ -159,47 +171,66 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
       await time.advanceBlockTo("1100");
       assert.equal(
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "10000"
+        "10100"
       );
       await time.advanceBlockTo("1101");
       assert.equal(
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "10100"
+        "10200"
       );
       await time.advanceBlockTo("1102");
       assert.equal(
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "10200"
+        "10300"
       );
       await time.advanceBlockTo("1103");
       assert.equal(
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "10300"
+        "10400"
       );
       await time.advanceBlockTo("1104");
       assert.equal(
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "10400"
-      );
-      await this.farmer.withdraw(0, "0", {
-        from: alice,
-      });
-      assert.equal(
-        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "0"
-      );
-      assert.equal(
-        (await this.token.balanceOf(alice)).valueOf().toString(),
-        "20900"
+        "10500"
       );
       await time.advanceBlockTo("1105");
       assert.equal(
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
+        "10500"
+      );
+      assert.equal(
+        (await this.token.balanceOf(alice)).valueOf().toString(),
+        "10500"
+      );
+      await time.advanceBlockTo("1106");
+      assert.equal(
+        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
+        "10500"
+      );
+      assert.equal(
+        (await this.token.balanceOf(alice)).valueOf().toString(),
+        "10500"
+      );
+      await time.advanceBlockTo("1107");
+      assert.equal(
+        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
+        "10500"
+      );
+      assert.equal(
+        (await this.token.balanceOf(alice)).valueOf().toString(),
+        "10500"
+      );
+      await this.farmer.withdraw(0, "0", {
+        from: alice,
+      });
+      await time.advanceBlockTo("1108");
+      assert.equal(
+        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
         "0"
       );
       assert.equal(
         (await this.token.balanceOf(alice)).valueOf().toString(),
-        "20900"
+        "21000"
       );
       await this.farmer.withdraw(0, "0", {
         from: alice,
@@ -208,19 +239,14 @@ contract("Hulkfarmer", ([alice, bob, carol, dev, minter]) => {
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
         "0"
       );
-      await time.advanceBlockTo("1106");
-      assert.equal(
-        (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
-        "0"
-      );
-      await time.advanceBlockTo("1500");
+      await time.advanceBlockTo("1120");
       assert.equal(
         (await this.farmer.pendingReward(0, alice)).valueOf().toString(),
         "0"
       );
       assert.equal(
         (await this.token.balanceOf(alice)).valueOf().toString(),
-        "20900"
+        "21000"
       );
     });
   });

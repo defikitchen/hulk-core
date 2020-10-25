@@ -291,14 +291,21 @@ contract("Farmer", ([alice, bob, carol, dev, minter]) => {
       // Alice deposits 10 more LPs at block 320. At this point:
       //   Alice should have: 4*1000 + 4*1/3*1000 + 2*1/6*1000 = 5666
       //   Farmer should have the remaining: 10000 - 5666 = 4334
-      await time.advanceBlockTo("320");
+      await time.advanceBlockTo("319");
+      // to block 320
       await this.farmer.deposit(0, "10", {
         from: alice,
       });
       assert.equal(
         (await this.token.totalSupply()).valueOf().toString(),
-        "10550"
+        "10500"
       );
+      // to block 321
+      await this.farmer.withdraw(0, "0", {
+        from: alice,
+      });
+      assert.equal((await time.latestBlock()).valueOf().toString(), "321");
+
       assert.equal(
         (await this.token.balanceOf(alice)).valueOf().toString(),
         "5666"

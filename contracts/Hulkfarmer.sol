@@ -254,7 +254,7 @@ contract Hulkfarmer is Ownable {
 			);
 		}
 		if (_from < farmingStartBlock || _to > farmingEndBlock) {
-			return 0;
+			tokenReward = 0;
 		}
 		// console.log(_from, _to, bonusEndBlock);
 		require(tokenReward >= 0, 'reward < 0');
@@ -287,7 +287,7 @@ contract Hulkfarmer is Ownable {
 		UserInfo storage user = userInfo[_pid][_user];
 		uint256 accPerShare = pool.accPerShare;
 		uint256 lpSupply = pool.lpToken.balanceOf(address(this));
-		if (block.number > pool.lastRewardBlock && lpSupply != 0) {
+		if (farmingOn && block.number > pool.lastRewardBlock && lpSupply != 0) {
 			uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
 			uint256 tokenReward = multiplier
 				.mul(tokenPerBlock)
@@ -312,10 +312,7 @@ contract Hulkfarmer is Ownable {
 	// Update reward variables of the given pool to be up-to-date.
 	function updatePool(uint256 _pid) public {
 		PoolInfo storage pool = poolInfo[_pid];
-		if (block.number > farmingEndBlock) {
-			farmingOn = false;
-		}
-		if (block.number <= pool.lastRewardBlock) {
+		if (block.number < pool.lastRewardBlock) {
 			return;
 		}
 		uint256 lpSupply = pool.lpToken.balanceOf(address(this));
@@ -329,19 +326,23 @@ contract Hulkfarmer is Ownable {
 			.mul(pool.allocPoint)
 			.div(totalAllocPoint);
 
-		if (tokenReward + token.totalSupply() > token.maxSupply()) {
+		// keeps maxSupply holy
+		if (token.totalSupply().add(tokenReward) > token.maxSupply()) {
 			farmingOn = false;
-			// BONUS_MULTIPLIER = 0;
-			// tokenPerBlock = 0;
-			// pool.accPerShare = 0;
-		} else if (farmingOn) {
-			token.mint(devaddr, tokenReward.div(20));
-			// main minting
-			token.mint(address(this), tokenReward);
-			pool.accPerShare = pool.accPerShare.add(
-				tokenReward.mul(1e12).div(lpSupply)
+			tokenReward = -(
+				token.maxSupply().sub(token.totalSupply().add(tokenReward))
 			);
-			pool.lastRewardBlock = block.number;
+		}
+
+		token.mint(devaddr, tokenReward.div(20));
+		token.mint(address(this), tokenReward);
+		pool.accPerShare = pool.accPerShare.add(
+			tokenReward.mul(1e12).div(lpSupply)
+		);
+		pool.lastRewardBlock = block.number;
+		// for farming < max
+		if (block.number >= farmingEndBlock) {
+			farmingOn = false;
 		}
 	}
 
@@ -413,7 +414,6 @@ contract Hulkfarmer is Ownable {
 				burnPending = 0;
 				sendPending = pending;
 			}
-
 			safeTokenTransfer(msg.sender, sendPending);
 		}
 		if (_amount > 0) {
