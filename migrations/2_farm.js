@@ -5,11 +5,9 @@ module.exports = async function (deployer, network, accounts) {
     console.log("Deploying farmer to network: " + network);
     deployer.then(async () => {
         try {
-            const TokenInstance = await Token.deployed();
-            // DEPLOY MASTERCHEF
             await deployer.deploy(
                 Farmer,
-                TokenInstance.address,
+                "0xe1f8cd01ab04b51d02c6fb2bca61b03fb5e33b99",
                 DEV, {
                     from: DEV,
                     gas: 3620000

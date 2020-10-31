@@ -53,7 +53,7 @@ contract Hulkfarmer is Ownable {
 	// total burned on unstake
 	uint256 public totalUnstakeBurn = 0;
 	// How many coins to burn when unstaking
-	uint256 public unstakeBurnRate = 0;
+	uint256 public unstakeBurnRate = 300;
 	// HULK tokens created per block.
 	uint256 public tokenPerBlock;
 	// farming on/off switch

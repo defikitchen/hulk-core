@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
+    "1": "truffle test",
     "test": "yarn cover && truffle test --stacktrace-extra",
     "cover": "yarn lint && truffle run coverage",
     "lint": "prettier --write './test/*.js' && prettier --write **/*.sol && solium -d contracts/ --fix"
